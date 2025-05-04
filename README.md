@@ -44,74 +44,41 @@ This project is a real-time product recommendation system that uses Apache Spark
 ![Spark](spark.png)
 ![Kafka](kafka.png)
 
-## How It Works
+## How the Product Recommendation System Works
+## 1. 📥 Data Ingestion
+The system starts by collecting sales data through Apache Kafka. Each incoming data point includes details like the user ID, product ID, how many units they bought, and the timestamp of the purchase.
 
-### 1. Data Ingestion
-- Sales data is streamed into the system via Kafka.
-- Each record contains information about a user's purchase (user ID, product ID, quantity, timestamp).
+## 2. ⚙️ Real-Time Stream Processing
+Using Apache Spark Structured Streaming, the data is processed as it arrives. Instead of handling one record at a time, the system waits until enough data is collected (based on a configurable threshold), then processes it in chunks.
 
-### 2. Stream Processing
-- Apache Spark's structured streaming is used to process the incoming data.
-- Data is accumulated until a sufficient amount is collected (configurable threshold).
+## 3. 🧹 Preparing the Data
+Once there's enough data, it’s cleaned and prepared for training the model:
+User and product IDs are converted into numerical indices.
+The system builds a user-product interaction matrix, which is essential for training the recommendation algorithm.
 
-### 3. Data Preparation
-- Once enough data is collected, it's prepared for model training:
-  - User and product IDs are indexed.
-  - Data is aggregated to create user-product interaction matrix.
+## 4. 🧠 Training the Recommendation Model
+To generate recommendations, the system uses ALS (Alternating Least Squares) from Spark MLlib — a popular collaborative filtering algorithm. The dataset is divided into training and testing parts to validate how well the model performs.
 
-### 4. Model Training
-- An Alternating Least Squares (ALS) collaborative filtering model is trained using Spark MLlib.
-- The data is split into training and test sets.
+## 5. 🎯 Generating Recommendations
+After training, the model predicts top N products for each user — essentially guessing what they might want to buy next based on their and others’ behavior.
 
-### 5. Recommendation Generation
-- The trained model generates top N product recommendations for each user.
+## 6. 📊 Model Evaluation
+To check how good the model is, it uses RMSE (Root Mean Square Error) — a standard metric that tells us how close the predictions are to the actual values in the test set.
 
-### 6. Evaluation
-- The model's performance is evaluated using Root Mean Square Error (RMSE) on the test set.
+## 7. 🔗 Building the Recommendation Graph
+Next, the system builds a graph based on the recommendations:
+Users and products are nodes.
+Edges show which products are recommended to which users.
 
-### 7. Graph Construction
-- A graph is constructed from the recommendations:
-  - Nodes represent users and products.
-  - Edges represent recommendations.
+## 8. 💾 Exporting Data
+This graph data (both nodes and edges) is exported into CSV files, making it easy to use in other tools or for visualizations.
 
-### 8. Data Export
-- The graph data (vertices and edges) is exported as CSV files.
+## 9. 📈 Visualizing the Results
+Finally, the system creates three main visualizations:
+A User-Product Recommendation Graph to show how users connect to their suggested products.
+A Degree Distribution Plot to analyze the spread of connections in the network.
+A Top Products Chart to highlight the most commonly recommended items.
 
-### 9. Visualization
-Three main visualizations are generated:
-- User-Product Recommendation Graph: Shows the network of users and recommended products.
-- Degree Distribution Plot: Displays the distribution of connections in the network.
-- Top Recommended Products Chart: Highlights the most frequently recommended products.
-
-
-
-## Get started
-
-1. Ensure Docker and Docker Compose are installed on your system.
-
-2. Clone the repository and install packages
-
-```bash
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-$ pip install -r requirements-dev.txt
-```
-
-3. Build and run the Docker containers:
-
-```bash
-$ docker compose up --build
-```
-
-4. The Spark application will start processing data, and the Kafka producer will start sending simulated sales data.
-
-5. Check the `results` directory for CSV files 
-
-6. visualization images:
-
-```bash
-$ python3 visualize_graph.py
-```
 
 
 ## Visualization
